@@ -14,6 +14,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.reverse import reverse
 
+def home (request):
+	"""
+	Send requests to / to the ember.js clientside app 
+	"""
+
+	return render_to_response('index.html', {}, RequestContext(request))
+
 #needed if you want to use all class-based views, replace foo and bar with respective names (e.g. forumposts-list)
 class APIRoot(APIView):
     def get(self, request):
@@ -53,16 +60,16 @@ class LightswitchDetail(APIView):
 	"""
 	def get_object(self, pk):
 		try:
-			return Lightswitch.object.get(pk=pk)
+			return Lightswitch.objects.get(pk=pk)
 		except Lightswitch.DoesNotExist:
 			raise Http404
 
 	def get(self, request, pk, format=None):
-		lightswitch = self.get.object(pk)
+		lightswitch = self.get_object(pk)
 		serializer = LightswitchSerializer(lightswitch, context={'request': request})
 		return Response(serializer.data)
 
-	def put (self, request, format=None):
+	def put (self, request, pk, format=None):
 		lightswitch = self.get_object(pk)
 		serializer = LightswitchSerializer(lightswitch, data=request.data, context={'request': request})
 		if serializer.is_valid():
@@ -86,7 +93,7 @@ class LightsceneDetail(APIView):
 	"""
 	def get_object(self, pk):
 		try:
-			return Lightscene.object.get(pk=pk)
+			return Lightscene.objects.get(pk=pk)
 		except Lightscene.DoesNotExist:
 			raise Http404
 
@@ -95,7 +102,7 @@ class LightsceneDetail(APIView):
 		serializer = LightsceneSerializer(lightscene, context={'request': request})
 		return Response(serializer.data)
 
-	def put (self, request, format=None):
+	def put (self, request, pk, format=None):
 		lightscene = self.get_object(pk)
 		serializer = LightsceneSerializer(lightscene, data=request.data, context={'request': request})
 		if serializer.is_valid():
@@ -119,7 +126,7 @@ class ThermostatDetail(APIView):
 	"""
 	def get_object(self, pk):
 		try:
-			return Thermostat.object.get(pk=pk)
+			return Thermostat.objects.get(pk=pk)
 		except Thermostat.DoesNotExist:
 			raise Http404
 
@@ -128,7 +135,7 @@ class ThermostatDetail(APIView):
 		serializer = ThermostatSerializer(thermostat, context={'request': request})
 		return Response(serializer.data)
 
-	def put (self, request, format=None):
+	def put (self, request, pk, format=None):
 		thermostat = self.get_object(pk)
 		serializer = ThermostatSerializer(thermostat, data=request.data, context={'request': request})
 		if serializer.is_valid():
@@ -152,7 +159,7 @@ class GarageopenerDetail(APIView):
 	"""
 	def get_object(self, pk):
 		try:
-			return Garageopener.object.get(pk=pk)
+			return Garageopener.objects.get(pk=pk)
 		except Garageopener.DoesNotExist:
 			raise Http404
 
@@ -161,7 +168,7 @@ class GarageopenerDetail(APIView):
 		serializer = GarageopenerSerializer(thermostat, context={'request': request})
 		return Response(serializer.data)
 
-	def put (self, request, format=None):
+	def put (self, request, pk, format=None):
 		garageopener = self.get_object(pk)
 		serializer = GarageopenerSerializer(garageopener, data=request.data, context={'request': request})
 		if serializer.is_valid():
