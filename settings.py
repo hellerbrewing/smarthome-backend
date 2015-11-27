@@ -101,10 +101,18 @@ STATICFILES_DIRS = (
     '/var/www/smarthome/static/',
 )
 
+import smarthome.rest_framework_config
+
 REST_FRAMEWORK = {
     # Use Django's standard 'django.contrib.auth' permissions,
     # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated'
-    ]
+    ],
+
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'smarthome.rest_framework_config.CsrfExemptSessionAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+
 }

@@ -225,11 +225,19 @@ define('smarthome/components/switch-instance', ['exports', 'ember'], function (e
 		didToggle: (function () {
 			console.log("lightswitch: " + this.get("lightswitch").get("name") + " value=" + this.get("lightswitch").get("on"));
 			this.get("lightswitch").save();
-		}).observes("lightswitch.on", "lightswitch.level"),
+		}).observes("lightswitch.on"),
 		actions: {
-			pushLevel: function pushLevel(value) {
-				var slider = this.get('lightswitch');
-				console.log("Slider value =" + this.get("lightswitch").get("level"));
+			pushLevel: function pushLevel(val1, val2) {
+				//var slider = this.get('lightswitch').get("level");
+				//console.log("val1 ="+val1)
+				//console.log(val2)
+				//console.log("val3 ="+val3)
+				//console.log("Slider ="+slider)
+				if (val1 == "slideStop") {
+					this.get("lightswitch").set("level", val2.value);
+					this.get("lightswitch").save();
+					console.log("Push Slider value =" + this.get("lightswitch").get("level"));
+				}
 			}
 		}
 	});
@@ -390,6 +398,62 @@ define('smarthome/initializers/app-version', ['exports', 'ember-cli-app-version/
     name: 'App Version',
     initialize: initializerFactory['default'](name, version)
   };
+
+});
+define('smarthome/initializers/application', ['exports', 'ember-data', 'ember'], function (exports, DS, Ember) {
+
+    'use strict';
+
+    exports.initialize = initialize;
+
+    function initialize(application) {
+        //custom array transform for ember Data
+        DS['default'].ArrayTransform = DS['default'].Transform.extend({
+            deserialize: function deserialize(serialized) {
+                return Ember['default'].typeOf(serialized) == "array" ? serialized : [];
+            },
+
+            serialize: function serialize(deserialized) {
+                var type = Ember['default'].typeOf(deserialized);
+                if (type == 'array') {
+                    return deserialized;
+                } else if (type == 'string') {
+                    return deserialized.split(',').map(function (item) {
+                        return Ember['default'].$.trim(item);
+                    });
+                } else {
+                    return [];
+                }
+            }
+        });
+        //custom object transform for ember data
+        DS['default'].ObjectTransform = DS['default'].Transform.extend({
+            deserialize: function deserialize(serialized) {
+                return Ember['default'].typeOf(serialized) == 'object' ? serialized : null;
+            },
+
+            serialize: function serialize(deserialized) {
+                var type = Ember['default'].typeOf(deserialized);
+                if (type == 'object') {
+                    return deserialized;
+                } else if (type == 'string') {
+                    return deserialized.split(',').map(function (item) {
+                        return Ember['default'].$.trim(item);
+                    });
+                } else {
+                    return null;
+                }
+            }
+        });
+
+        application.register("transform:array", DS['default'].ArrayTransform);
+        application.register("transform:object", DS['default'].ObjectTransform);
+    }
+
+    exports['default'] = {
+        name: 'application',
+        initialize: initialize
+    };
 
 });
 define('smarthome/initializers/export-application-global', ['exports', 'ember', 'smarthome/config/environment'], function (exports, Ember, config) {
@@ -4062,7 +4126,7 @@ define('smarthome/templates/components/switch-instance', ['exports'], function (
           return morphs;
         },
         statements: [
-          ["inline","ui-slider",[],["value",["subexpr","@mut",[["get","lightswitch.level",["loc",[null,[5,23],[5,40]]]]],[],[]],"min",0,"max",100,"action","pushLevel"],["loc",[null,[5,5],[5,75]]]]
+          ["inline","ui-slider",[],["value",["subexpr","@mut",[["get","lightswitch.level",["loc",[null,[5,23],[5,40]]]]],[],[]],"min",0,"max",100,"action","pushLevel","immediateResponse",false,"on","mouse-up"],["loc",[null,[5,5],[5,113]]]]
         ],
         locals: [],
         templates: []
@@ -5061,7 +5125,7 @@ define('smarthome/tests/components/switch-instance.jshint', function () {
 
   QUnit.module('JSHint - components');
   QUnit.test('components/switch-instance.js should pass jshint', function(assert) { 
-    assert.ok(false, 'components/switch-instance.js should pass jshint.\ncomponents/switch-instance.js: line 5, col 117, Missing semicolon.\ncomponents/switch-instance.js: line 6, col 39, Missing semicolon.\ncomponents/switch-instance.js: line 10, col 17, \'slider\' is defined but never used.\ncomponents/switch-instance.js: line 9, col 29, \'value\' is defined but never used.\n\n4 errors'); 
+    assert.ok(false, 'components/switch-instance.js should pass jshint.\ncomponents/switch-instance.js: line 15, col 24, Expected \'===\' and instead saw \'==\'.\ncomponents/switch-instance.js: line 16, col 65, Missing semicolon.\ncomponents/switch-instance.js: line 17, col 47, Missing semicolon.\n\n3 errors'); 
   });
 
 });
@@ -5179,6 +5243,16 @@ define('smarthome/tests/helpers/start-app.jshint', function () {
   QUnit.module('JSHint - helpers');
   QUnit.test('helpers/start-app.js should pass jshint', function(assert) { 
     assert.ok(true, 'helpers/start-app.js should pass jshint.'); 
+  });
+
+});
+define('smarthome/tests/initializers/application.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - initializers');
+  QUnit.test('initializers/application.js should pass jshint', function(assert) { 
+    assert.ok(false, 'initializers/application.js should pass jshint.\ninitializers/application.js: line 8, col 48, Expected \'===\' and instead saw \'==\'.\ninitializers/application.js: line 13, col 24, Expected \'===\' and instead saw \'==\'.\ninitializers/application.js: line 15, col 31, Expected \'===\' and instead saw \'==\'.\ninitializers/application.js: line 27, col 48, Expected \'===\' and instead saw \'==\'.\ninitializers/application.js: line 32, col 24, Expected \'===\' and instead saw \'==\'.\ninitializers/application.js: line 34, col 31, Expected \'===\' and instead saw \'==\'.\n\n6 errors'); 
   });
 
 });
@@ -5677,6 +5751,41 @@ define('smarthome/tests/unit/controllers/thermostats-test.jshint', function () {
   });
 
 });
+define('smarthome/tests/unit/initializers/application-test', ['ember', 'smarthome/initializers/application', 'qunit'], function (Ember, initializers__application, qunit) {
+
+  'use strict';
+
+  var registry, application;
+
+  qunit.module('Unit | Initializer | application', {
+    beforeEach: function beforeEach() {
+      Ember['default'].run(function () {
+        application = Ember['default'].Application.create();
+        registry = application.registry;
+        application.deferReadiness();
+      });
+    }
+  });
+
+  // Replace this with your real tests.
+  qunit.test('it works', function (assert) {
+    initializers__application.initialize(registry, application);
+
+    // you would normally confirm the results of the initializer here
+    assert.ok(true);
+  });
+
+});
+define('smarthome/tests/unit/initializers/application-test.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - unit/initializers');
+  QUnit.test('unit/initializers/application-test.js should pass jshint', function(assert) { 
+    assert.ok(true, 'unit/initializers/application-test.js should pass jshint.'); 
+  });
+
+});
 define('smarthome/tests/unit/models/garageopener-test', ['ember-qunit'], function (ember_qunit) {
 
   'use strict';
@@ -6009,7 +6118,7 @@ catch(err) {
 if (runningTests) {
   require("smarthome/tests/test-helper");
 } else {
-  require("smarthome/app")["default"].create({"API_HOST":"http://localhost:8081","name":"smarthome","version":"0.0.0+0aea1e25","API_NAMESPACE":"api","API_ADD_TRAILING_SLASHES":true});
+  require("smarthome/app")["default"].create({"API_HOST":"http://localhost:8081","name":"smarthome","version":"0.0.0+3d2a8bd3","API_NAMESPACE":"api","API_ADD_TRAILING_SLASHES":true});
 }
 
 /* jshint ignore:end */

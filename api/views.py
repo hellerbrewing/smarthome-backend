@@ -1,3 +1,4 @@
+import pycurl
 from django.shortcuts import *
 
 # Import models
@@ -74,7 +75,16 @@ class LightswitchDetail(APIView):
 		serializer = LightswitchSerializer(lightswitch, data=request.data, context={'request': request})
 		if serializer.is_valid():
 			serializer.save()
-			#insert curl command here
+			#insert PyCurl code here
+			c = pycurl.Curl()
+			u =('http://192.168.0.203/port_3480/data_request?id=lu_action&output_format=json&DeviceNum=%s&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=%s' % (lightswitch.deviceID, lightswitch.level))
+			#l = lightswitch.level
+			print u
+			c.setopt(c.URL, u)
+			c.perform()
+			#debugging code
+			print u
+			print lightswitch.level
 			return Response(serializer.data)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -149,8 +159,8 @@ class GarageopenerList(APIView):
 	List all garage door openers.
 	"""
 	def get (self, request, format=None):
-		garageopeners = Garageopeners.objects.all()
-		serializer = GarageopenerSerializer(garageopeners, many=True, context={'request': request})
+		garageopener = Garageopener.objects.all()
+		serializer = GarageopenerSerializer(garageopener, many=True, context={'request': request})
 		return Response(serializer.data)
 
 class GarageopenerDetail(APIView):
