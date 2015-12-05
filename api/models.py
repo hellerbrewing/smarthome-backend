@@ -9,9 +9,9 @@ class Lightswitch(models.Model):
     This model represents a lightswitch.
     """
     name = models.CharField(max_length=20, blank=False, unique=True, validators=[removeJavascriptKeyword])
-    deviceID = models.IntegerField(null=True, unique=True)
+    deviceID = models.IntegerField(blank=True, null=True)
     on = models.BooleanField(default=False)
-    level = models.IntegerField(null=True)
+    level = models.IntegerField(blank=True, null=True)
 
     def __unicode__(self):
         return self.name
@@ -22,7 +22,11 @@ class Lightscene(models.Model):
     """
     name = models.CharField(max_length=20, blank=False, unique=True, validators=[removeJavascriptKeyword])
     on = models.BooleanField(default=False)
-    lightswitches = models.ManyToManyField(Lightswitch, related_name = "lightswitches")
+    sceneID = models.IntegerField(blank=True, null=True)
+    #lightswitches = models.ManyToManyField(Lightswitch, related_name = "lightswitches")
+
+    def __unicode__(self):
+        return self.name
 
 class Thermostat(models.Model):
     """
@@ -34,9 +38,15 @@ class Thermostat(models.Model):
     hold = models.BooleanField(default=False)
     heat = models.BooleanField(default=False)
 
+    def __unicode__(self):
+        return self.name
+
 class Garageopener(models.Model):
     """
     This model represents a garage door opener.
     """
     name = models.CharField(max_length=20, blank=False, unique=True, validators=[removeJavascriptKeyword])
     open = models.BooleanField(default=False)
+
+    def __unicode__(self):
+        return self.name

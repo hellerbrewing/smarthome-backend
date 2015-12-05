@@ -20,4 +20,5 @@ urlpatterns = [
 	url(r'^thermostats/(?P<pk>[0-9]+)/$', views.ThermostatDetail.as_view(), name='thermostat-detail'),
 	url(r'^garageopeners/$', views.GarageopenerList.as_view(), name='garageopener-list'),
 	url(r'^garageopeners/(?P<pk>[0-9]+)/$', views.GarageopenerDetail.as_view(), name='garageopener-detail'),
+	url(r'^session/', views.Session.as_view()),
 ]

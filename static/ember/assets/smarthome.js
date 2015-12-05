@@ -254,11 +254,13 @@ define('smarthome/components/thermostat-instance', ['exports', 'ember'], functio
 			increaseTemp: function increaseTemp() {
 				var thermostat = this.get('thermostat');
 				thermostat.set('tempset', thermostat.get('tempset') + 1);
+				this.get("thermostat").save();
 				console.log("Thermostat set temp =" + this.get("thermostat").get("tempset"));
 			},
 			decreaseTemp: function decreaseTemp() {
 				var thermostat = this.get('thermostat');
 				thermostat.set('tempset', thermostat.get('tempset') - 1);
+				this.get("thermostat").save();
 				console.log("Thermostat set temp =" + this.get("thermostat").get("tempset"));
 			}
 		}
@@ -298,21 +300,55 @@ define('smarthome/controllers/array', ['exports', 'ember'], function (exports, E
 });
 define('smarthome/controllers/auth', ['exports', 'ember'], function (exports, Ember) {
 
-	'use strict';
+    'use strict';
 
-	exports['default'] = Ember['default'].Controller.extend({
-		username: '',
-		loggedIn: false,
-		errorMsg: '',
-		remember: false,
-		actions: {
-			login: function login() {
-				//do stuff to authenticate here
-				this.set('loggedIn', true);
-				this.transitionTo('lighting');
-			}
-		}
-	});
+    exports['default'] = Ember['default'].Controller.extend({
+        username: '',
+        isLoggedIn: false,
+        errorMsg: '',
+        remember: false,
+        actions: {
+            login: function login() {
+                //do stuff to authenticate here
+                var username = this.get('username');
+                var password = this.get('password');
+                var remember = this.get('remember');
+                var data = {
+                    'username': username,
+                    'password': password };
+                var controllerObj = this;
+                Ember['default'].$.post('../api/session/', data, function (response) {
+                    if (response.isauthenticated) {
+                        //success
+                        console.log('Login POST Request to ../api/session/ was successful.');
+                        controllerObj.set('username', response.username);
+                        controllerObj.set('userid', response.userid);
+                        controllerObj.set('isLoggedIn', true);
+                    } else {
+                        //errors
+                        console.log('Login POST Request to ../api/session/ was successful.');
+                        controllerObj.set('errorMsg', response.message);
+                    }
+                });
+            },
+            logout: function logout() {
+                var remember = this.get('remember');;
+                var controllerObj = this;
+                Ember['default'].$.ajax({ url: '../api/session/', type: 'DELETE' }).then(function (response) {
+                    console.log('Logout success.');
+                    controllerObj.set('isLoggedIn', false);
+                    controllerObj.set('errorMsg', '');
+                    controllerObj.set('username', '');
+                    controllerObj.set('userid', '');
+                    if (!remember) {
+                        //save to username and pass to local storage
+
+                    }
+                    controllerObj.transitionToRoute('auth');
+                });
+            }
+        }
+    });
 
 });
 define('smarthome/controllers/gdopeners', ['exports', 'ember'], function (exports, Ember) {
@@ -597,6 +633,18 @@ define('smarthome/routes/application', ['exports', 'ember'], function (exports, 
 		beforeModel: function beforeModel(transition) {
 			this.authCheck(transition);
 			//will have other stuff here once its connected to the restapi
+			//Ember.$.get('../api/session/', data, function(response){
+			//if(response.isauthenticated){
+			//success
+			//console.log('Success');
+			//controllerObj.set('username', response.username);
+			//controllerObj.set('userid', response.userid);
+			//controllerObj.set('isLoggedIn', true);
+			//} else{
+			//errors
+			//console.log('Failure');
+			//controllerObj.set('errorMsg', response.message);
+			//}
 		},
 		authCheck: function authCheck(transition) {
 			//method to check user credentials and redirect if necessary
@@ -605,19 +653,35 @@ define('smarthome/routes/application', ['exports', 'ember'], function (exports, 
 			var auth = t.controllerFor('auth');
 			var previoustrans = t.get('currentTransition');
 			console.log('User attempting to access: /' + transition.targetName);
-			if (!auth.loggedIn) {
-				if (transition.targetName !== 'auth') {
-					t.set('currentTransition', transition);
-					transition.abort();
-					console.log('User is unauthenticated, redirecting');
-					t.transitionTo('auth');
-				}
-			} else if (previoustrans) {
-				console.log('Redirecting back to original request: /' + previoustrans.targetname);
-				t.set('currentTransition', null);
-				previoustrans.retry();
+
+			if (!auth.isLoggedIn) {
+				Ember['default'].$.getJSON('../api/session/', function (response) {
+					if (response.isauthenticated) {
+						//success
+						console.log('Login refresh to ../api/session/ was successful.');
+						auth.set('username', response.username);
+						auth.set('userid', response.userid);
+						auth.set('isLoggedIn', true);
+					} else {
+						if (transition.targetName !== 'auth') {
+							t.set('currentTransition', transition);
+							transition.abort();
+							console.log('User is unauthenticated, redirecting');
+							t.transitionTo('auth');
+						}
+						//else if(previoustrans){
+						//	console.log('Redirecting back to original request: /'+previoustrans.targetname);
+						//	t.set('currentTransition', null);
+						//	previoustrans.retry();
+						//}
+					}
+				});
 			}
+
 			//will have other stuff here once its connected to restapi
+		},
+		setupController: function setupController(controller, model) {
+			controller.set('authController', this.controllerFor('auth'));
 		},
 		actions: {
 			willTransition: function willTransition(transition) {
@@ -913,14 +977,7 @@ define('smarthome/templates/auth', ['exports'], function (exports) {
             dom.appendChild(el1, el2);
             var el2 = dom.createTextNode("\n			");
             dom.appendChild(el1, el2);
-            var el2 = dom.createElement("label");
-            dom.setAttribute(el2,"class","checkbox");
-            var el3 = dom.createTextNode("\n			  ");
-            dom.appendChild(el2, el3);
-            var el3 = dom.createComment("");
-            dom.appendChild(el2, el3);
-            var el3 = dom.createTextNode(" Remember me\n			");
-            dom.appendChild(el2, el3);
+            var el2 = dom.createComment("<label class=\"checkbox\">\n			  {{input type=\"checkbox\" checked=remember}} Remember me\n			</label>");
             dom.appendChild(el1, el2);
             var el2 = dom.createTextNode("\n			");
             dom.appendChild(el1, el2);
@@ -941,19 +998,17 @@ define('smarthome/templates/auth', ['exports'], function (exports) {
             var element2 = dom.childAt(fragment, [1]);
             var element3 = dom.childAt(element2, [1]);
             var element4 = dom.childAt(element2, [7]);
-            var morphs = new Array(5);
+            var morphs = new Array(4);
             morphs[0] = dom.createMorphAt(dom.childAt(element3, [1, 0]),0,0);
             morphs[1] = dom.createMorphAt(element3,3,3);
             morphs[2] = dom.createMorphAt(dom.childAt(element2, [3]),1,1);
-            morphs[3] = dom.createMorphAt(dom.childAt(element2, [5]),1,1);
-            morphs[4] = dom.createElementMorph(element4);
+            morphs[3] = dom.createElementMorph(element4);
             return morphs;
           },
           statements: [
             ["content","errorMsg",["loc",[null,[10,120],[10,132]]]],
             ["inline","input",[],["class","form-control","value",["subexpr","@mut",[["get","username",["loc",[null,[11,39],[11,47]]]]],[],[]],"placeholder","Username","enter","login"],["loc",[null,[11,4],[11,87]]]],
             ["inline","input",[],["class","form-control","value",["subexpr","@mut",[["get","password",["loc",[null,[14,39],[14,47]]]]],[],[]],"placeholder","Password","type","password","enter","login"],["loc",[null,[14,4],[14,103]]]],
-            ["inline","input",[],["type","checkbox","checked",["subexpr","@mut",[["get","remember",["loc",[null,[17,37],[17,45]]]]],[],[]]],["loc",[null,[17,5],[17,47]]]],
             ["element","action",["login"],[],["loc",[null,[19,49],[19,67]]]]
           ],
           locals: [],
@@ -1010,14 +1065,7 @@ define('smarthome/templates/auth', ['exports'], function (exports) {
             dom.appendChild(el1, el2);
             var el2 = dom.createTextNode("\n			");
             dom.appendChild(el1, el2);
-            var el2 = dom.createElement("label");
-            dom.setAttribute(el2,"class","checkbox");
-            var el3 = dom.createTextNode("\n			  ");
-            dom.appendChild(el2, el3);
-            var el3 = dom.createComment("");
-            dom.appendChild(el2, el3);
-            var el3 = dom.createTextNode(" Remember me\n			");
-            dom.appendChild(el2, el3);
+            var el2 = dom.createComment("<label class=\"checkbox\">\n			  {{input type=\"checkbox\" checked=remember}} Remember me\n			</label>");
             dom.appendChild(el1, el2);
             var el2 = dom.createTextNode("\n			");
             dom.appendChild(el1, el2);
@@ -1037,17 +1085,15 @@ define('smarthome/templates/auth', ['exports'], function (exports) {
           buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
             var element0 = dom.childAt(fragment, [1]);
             var element1 = dom.childAt(element0, [7]);
-            var morphs = new Array(4);
+            var morphs = new Array(3);
             morphs[0] = dom.createMorphAt(dom.childAt(element0, [1]),1,1);
             morphs[1] = dom.createMorphAt(dom.childAt(element0, [3]),1,1);
-            morphs[2] = dom.createMorphAt(dom.childAt(element0, [5]),1,1);
-            morphs[3] = dom.createElementMorph(element1);
+            morphs[2] = dom.createElementMorph(element1);
             return morphs;
           },
           statements: [
             ["inline","input",[],["class","form-control","value",["subexpr","@mut",[["get","username",["loc",[null,[25,39],[25,47]]]]],[],[]],"placeholder","Username","enter","login"],["loc",[null,[25,4],[25,87]]]],
             ["inline","input",[],["class","form-control","value",["subexpr","@mut",[["get","password",["loc",[null,[28,39],[28,47]]]]],[],[]],"placeholder","Password","type","password","enter","login"],["loc",[null,[28,4],[28,103]]]],
-            ["inline","input",[],["type","checkbox","checked",["subexpr","@mut",[["get","remember",["loc",[null,[31,37],[31,45]]]]],[],[]]],["loc",[null,[31,5],[31,47]]]],
             ["element","action",["login"],[],["loc",[null,[33,49],[33,67]]]]
           ],
           locals: [],
@@ -5135,7 +5181,7 @@ define('smarthome/tests/components/thermostat-instance.jshint', function () {
 
   QUnit.module('JSHint - components');
   QUnit.test('components/thermostat-instance.js should pass jshint', function(assert) { 
-    assert.ok(false, 'components/thermostat-instance.js should pass jshint.\ncomponents/thermostat-instance.js: line 10, col 87, Missing semicolon.\ncomponents/thermostat-instance.js: line 15, col 87, Missing semicolon.\n\n2 errors'); 
+    assert.ok(false, 'components/thermostat-instance.js should pass jshint.\ncomponents/thermostat-instance.js: line 10, col 42, Missing semicolon.\ncomponents/thermostat-instance.js: line 11, col 87, Missing semicolon.\ncomponents/thermostat-instance.js: line 16, col 42, Missing semicolon.\ncomponents/thermostat-instance.js: line 17, col 87, Missing semicolon.\n\n4 errors'); 
   });
 
 });
@@ -5145,7 +5191,7 @@ define('smarthome/tests/controllers/auth.jshint', function () {
 
   QUnit.module('JSHint - controllers');
   QUnit.test('controllers/auth.js should pass jshint', function(assert) { 
-    assert.ok(true, 'controllers/auth.js should pass jshint.'); 
+    assert.ok(false, 'controllers/auth.js should pass jshint.\ncontrollers/auth.js: line 33, col 49, Unnecessary semicolon.\ncontrollers/auth.js: line 47, col 15, Missing semicolon.\ncontrollers/auth.js: line 13, col 17, \'remember\' is defined but never used.\ncontrollers/auth.js: line 36, col 22, \'response\' is defined but never used.\n\n4 errors'); 
   });
 
 });
@@ -5322,7 +5368,7 @@ define('smarthome/tests/routes/application.jshint', function () {
 
   QUnit.module('JSHint - routes');
   QUnit.test('routes/application.js should pass jshint', function(assert) { 
-    assert.ok(true, 'routes/application.js should pass jshint.'); 
+    assert.ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 27, col 13, \'previoustrans\' is defined but never used.\nroutes/application.js: line 58, col 43, \'model\' is defined but never used.\n\n2 errors'); 
   });
 
 });
