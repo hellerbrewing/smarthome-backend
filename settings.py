@@ -130,9 +130,9 @@ STATICFILES_DIRS = (
     '/var/www/smarthome/static/',
 )
 
-import smarthome.rest_framework_config
-
 if isDev == True:
+    import smarthome.rest_framework_config
+
     REST_FRAMEWORK = {
         # Use Django's standard 'django.contrib.auth' permissions,
         # or allow read-only access for unauthenticated users.
@@ -147,6 +147,8 @@ if isDev == True:
 
     }
 else:
+    import rest_framework_config
+
     REST_FRAMEWORK = {
         # Use Django's standard 'django.contrib.auth' permissions,
         # or allow read-only access for unauthenticated users.
