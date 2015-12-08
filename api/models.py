@@ -1,7 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib import admin
-from smarthome.api.validators import *
+from localsettings import *
+if isDev == True:
+    from smarthome.api.validators import *
+else:
+    from api.validators import *
 
 # Create your models here.
 class Lightswitch(models.Model):

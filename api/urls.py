@@ -2,7 +2,11 @@ from django.conf.urls import include, url
 
 # Django Rest Framework
 from rest_framework import routers
-from smarthome.api import views
+from localsettings import *
+if isDev == True:
+    from smarthome.api import views
+else:
+    from api import views
 from rest_framework.urlpatterns import format_suffix_patterns
 
 #REST API routes

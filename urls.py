@@ -16,11 +16,23 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
-from smarthome.api import views
+from localsettings import *
+if isDev == True:
+    from smarthome.api import views
+else:
+    from api import views
 
-urlpatterns = [
-    url(r'^admin/', include(admin.site.urls)),
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'^api/', include('smarthome.api.urls')),
-    url(r'^', views.home),
-]
+if isDev == True:
+    urlpatterns = [
+        url(r'^admin/', include(admin.site.urls)),
+        url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+        url(r'^api/', include('smarthome.api.urls')),
+        url(r'^', views.home),
+    ]
+else:
+    urlpatterns = [
+        url(r'^admin/', include(admin.site.urls)),
+        url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+        url(r'^api/', include('api.urls')),
+        url(r'^', views.home),
+    ]

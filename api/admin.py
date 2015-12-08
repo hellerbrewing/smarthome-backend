@@ -1,5 +1,9 @@
 from django.contrib import admin
-from smarthome.api.models import *
+from localsettings import *
+if isDev == True:
+	from smarthome.api.models import *
+else:
+	from api.models import *
 
 # Register your models here.
 

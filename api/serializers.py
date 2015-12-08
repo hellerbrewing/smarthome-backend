@@ -2,7 +2,11 @@ from rest_framework import serializers
 
 #load django and webapp models
 from django.contrib.auth.models import *
-from smarthome.api.models import *
+from localsettings import *
+if isDev == True:
+    from smarthome.api.models import *
+else:
+    from api.models import *
 
 class LightswitchSerializer(serializers.ModelSerializer):
     name = serializers.CharField(read_only=True)

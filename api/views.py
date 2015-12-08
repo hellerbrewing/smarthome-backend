@@ -4,11 +4,19 @@ from django.shortcuts import *
 # Import models
 from django.db import models
 from django.contrib.auth.models import *
-from smarthome.api.models import *
+from localsettings import *
+if isDev == True:
+    from smarthome.api.models import *
+else:
+    from api.models import *
+
 
 #REST API
 from rest_framework import viewsets
-from smarthome.api.serializers import *
+if isDev == True:
+    from smarthome.api.serializers import *
+else:
+    from api.serializers import *
 from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
