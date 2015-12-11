@@ -22,10 +22,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+if isDev == True:
+    DEBUG = True
 
-ALLOWED_HOSTS = []
+    ALLOWED_HOSTS = []
+else:
+    DEBUG = False
 
+    ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -38,7 +42,8 @@ if isDev == True:
         'django.contrib.messages',
         'django.contrib.staticfiles',
         'smarthome.api',
-        'rest_framework',	
+        'rest_framework',
+        'axes',
     )
 else:
     INSTALLED_APPS = (
@@ -49,18 +54,20 @@ else:
         'django.contrib.messages',
         'django.contrib.staticfiles',
         'api',
-        'rest_framework',   
+        'rest_framework',
+        'axes',
     )
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+#    'django.middleware.csrf.CsrfViewMiddleware',  #comment out to make django -axes work
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'axes.middleware.FailedLoginMiddleware',
 )
 
 if isDev == True:
@@ -162,3 +169,8 @@ else:
         ],
 
     }
+
+#django-axes configuration settings
+#https://pypi.python.org/pypi/django-axes/
+AXES_LOCK_OUT_AT_FAILURE = False
+AXES_LOGIN_FAILURE_LIMIT = 20

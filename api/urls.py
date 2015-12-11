@@ -9,6 +9,9 @@ else:
     from api import views
 from rest_framework.urlpatterns import format_suffix_patterns
 
+#django-axes
+from axes.decorators import watch_login
+
 #REST API routes
 router = routers.DefaultRouter()
 
@@ -24,5 +27,6 @@ urlpatterns = [
 	url(r'^thermostats/(?P<pk>[0-9]+)/$', views.ThermostatDetail.as_view(), name='thermostat-detail'),
 	url(r'^garageopeners/$', views.GarageopenerList.as_view(), name='garageopener-list'),
 	url(r'^garageopeners/(?P<pk>[0-9]+)/$', views.GarageopenerDetail.as_view(), name='garageopener-detail'),
-	url(r'^session/', views.Session.as_view()),
+	#url(r'^session/', views.Session.as_view()),
+	url(r'^session/', watch_login(views.Session.as_view())), #django-axes
 ]
