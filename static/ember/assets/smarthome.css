@@ -1,0 +1,142 @@
+table, td, th {
+}
+
+td {
+	width: 100px;
+	height: 20px;
+	padding: 15px;
+	vertical-align: middle
+}
+.container {
+  width: 180px;
+  height: 226px;
+  margin: 50px auto;
+}
+.card {
+  width: 180px;
+  height: 100%;
+  border: 1px solid;
+  border-radius: 5px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  background: #F9F9F9;
+  position: relative;
+  box-shadow: 0px 0px 3px #ddd;
+}
+.card .inner {
+  background: #F9F9F9;
+  border: 1px solid #E3E3E3;
+  border-radius: 0px 0px 5px 5px;
+  width: 100%;
+  height: 100px;
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  font-family: arial;
+  text-align: center;
+  box-shadow: inset 0px 0px 1px #FFF;
+  text-transform: uppercase;
+}
+.card .inner .title {
+  display: block;
+  font-size: 9px;
+  color: #fff;
+  margin-top: -10px;
+}
+.card .inner .title .text {
+  display: inline-block;
+  padding: 5px 15px;
+  border-radius: 50px;
+  font-weight: bold;
+}
+.card .inner .number {
+  color: #313A3E;
+  font-size: 50px;
+  font-weight: bold;
+  display: block;
+  margin-top: 5px;
+  float: left;
+  width: 50%;
+}
+.card .inner .measure {
+  color: #676767;
+  font-size: 10px;
+  display: block;
+  margin-top: -10px;
+}
+.temp.heat {
+  background: #ec6f69;
+  border: 1px solid #de3932;
+}
+.temp.heat .inner {
+  border-top: 1px solid #de3932;
+}
+.temp.heat .inner .text {
+  border: 1px solid #de3932;
+  background: #ec6f69;
+  text-shadow: 1px 1px 0px #de3932;
+}
+.temp.heat .inner .icon {
+  display: block;
+  position: absolute;
+  top: -65px;
+  left: 75px;
+  width: 17px;
+  height: 17px;
+  background: #fff;
+  border-radius: 17px;
+  border: 4px solid #ec6f69;
+  box-shadow: 0 0 0 4px #ffffff, 1px 1px 0 4px #de3932;
+}
+.temp.heat .inner .icon:before {
+  content: '';
+  display: block;
+  width: 7px;
+  height: 25px;
+  background: #fff;
+  position: absolute;
+  top: -30px;
+  left: 0px;
+  border: 5px solid #ec6f69;
+  border-radius: 10px 10px 0px 0px;
+  border-bottom: 0px none;
+  box-shadow: 0 -4px 0 4px #ffffff, 4px -3px 0 1px #de3932;
+}
+.temp.cool {
+  background: #85adff;
+  border: 1px solid #5d79b2;
+}
+.temp.cool .inner {
+  border-top: 1px solid #5d79b2;
+}
+.temp.cool .inner .text {
+  border: 1px solid #5d79b2;
+  background: #85adff;
+  text-shadow: 1px 1px 0px #5d79b2;
+}
+.temp.cool .inner .icon {
+  display: block;
+  position: absolute;
+  top: -65px;
+  left: 75px;
+  width: 17px;
+  height: 17px;
+  background: #fff;
+  border-radius: 17px;
+  border: 4px solid #85adff;
+  box-shadow: 0 0 0 4px #ffffff, 1px 1px 0 4px #5d79b2;
+}
+.temp.cool .inner .icon:before {
+  content: '';
+  display: block;
+  width: 7px;
+  height: 25px;
+  background: #fff;
+  position: absolute;
+  top: -30px;
+  left: 0px;
+  border: 5px solid #85adff;
+  border-radius: 10px 10px 0px 0px;
+  border-bottom: 0px none;
+  box-shadow: 0 -4px 0 4px #ffffff, 4px -3px 0 1px #5d79b2;
+}
