@@ -26,7 +26,8 @@ class Lightscene(models.Model):
     """
     name = models.CharField(max_length=20, blank=False, unique=True, validators=[removeJavascriptKeyword])
     on = models.BooleanField(default=False)
-    sceneID = models.IntegerField(blank=True, null=True)
+    sceneIDon = models.IntegerField(blank=True, null=True)
+    sceneIDoff = models.IntegerField(blank=True, null=True)
     #lightswitches = models.ManyToManyField(Lightswitch, related_name = "lightswitches")
 
     def __unicode__(self):

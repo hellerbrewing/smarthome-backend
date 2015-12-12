@@ -124,14 +124,21 @@ class LightswitchDetail(APIView):
 			serializer.save()
 			#insert PyCurl code here
 			c = pycurl.Curl()
-			u =('http://192.168.0.203/port_3480/data_request?id=lu_action&output_format=json&DeviceNum=%s&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=%s' % (lightswitch.deviceID, lightswitch.level))
+			if lightswitch.level != None:
+				u =('http://192.168.0.203/port_3480/data_request?id=lu_action&output_format=json&DeviceNum=%s&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=%s' % (lightswitch.deviceID, lightswitch.level))
+			else:
+				if lightswitch.on == True:
+					p = 1
+				else:
+					p = 0
+				u =('http://192.168.0.203/port_3480/data_request?id=lu_action&output_format=json&DeviceNum=%s&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=%s' % (lightswitch.deviceID, p))
 			#l = lightswitch.level
-			print u
+			#print u
 			c.setopt(c.URL, u)
 			c.perform()
 			#debugging code
 			print u
-			print lightswitch.level
+			#print lightswitch.level
 			return Response(serializer.data)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -165,6 +172,15 @@ class LightsceneDetail(APIView):
 		if serializer.is_valid():
 			serializer.save()
 			#insert curl command here
+			c = pycurl.Curl()
+			if lightscene.on == True:
+				u =('http://192.168.0.203/port_3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum=%s' % (lightscene.sceneIDon))
+			else:
+				u =('http://192.168.0.203/port_3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum=%s' % (lightscene.sceneIDoff))
+			c.setopt(c.URL, u)
+			c.perform()
+			#debugging code
+			print u
 			return Response(serializer.data)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
